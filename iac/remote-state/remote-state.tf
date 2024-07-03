@@ -1,7 +1,3 @@
-variable "data_encryption_key_arn" {
-  type = string
-}
-
 variable "environment" {
   type = string
 }
@@ -12,6 +8,13 @@ variable "backend_bucket" {
 
 
 terraform {
+  # backend "s3" {
+  #   key            = "remote-state/terraform.tfstate"
+  #   encrypt        = true
+  #   region         = "ap-southeast-2"
+  #   dynamodb_table = "remote-state-lock"
+  # }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -61,8 +64,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = var.data_encryption_key_arn
-      sse_algorithm     = "aws:kms"
+      sse_algorithm     = "AES256"
     }
   }
 }

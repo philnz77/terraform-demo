@@ -6,19 +6,14 @@ variable "environment" {
   type = string
 }
 
-variable "kms_key_id" {
-  type = string
-}
-
-
 terraform {
   backend "s3" {
     key            = "main/terraform.tfstate"
     encrypt        = true
     region         = "ap-southeast-2"
     dynamodb_table = "remote-state-lock"
-
   }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -73,7 +68,6 @@ resource "aws_elasticache_replication_group" "cache_replication_group" {
   replicas_per_node_group    = 1
   transit_encryption_enabled = true
   at_rest_encryption_enabled = true
-  kms_key_id = var.kms_key_id
   timeouts {
     create = "30m"
   }

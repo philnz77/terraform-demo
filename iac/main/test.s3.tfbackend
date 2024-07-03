@@ -1,2 +1,1 @@
 bucket = "philnz77-myapp-test-state"
-kms_key_id = "TBD_ENCRYPTION_KEY_ARN"

@@ -61,21 +61,6 @@ data "aws_iam_policy_document" "bucket_policy" {
       identifiers = ["*"]
     }
   }
-  statement {
-    sid = "RootAccess"
-    effect = "Allow"
-    actions = [
-      "s3:*"
-    ]
-    resources = [
-      aws_s3_bucket.terraform_state.arn,
-      "${aws_s3_bucket.terraform_state.arn}/*"
-    ]
-    principals {
-      type = "AWS"
-      identifiers = [data.aws_caller_identity.current.account_id]
-    }
-  }
 }
  
 

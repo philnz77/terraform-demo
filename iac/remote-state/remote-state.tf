@@ -7,6 +7,7 @@ variable "backend_bucket" {
 }
 
 
+
 terraform {
   # backend "s3" {
   #   key            = "remote-state/terraform.tfstate"
@@ -35,9 +36,53 @@ provider "aws" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    sid = "AllowSSLRequestsOnly"
+    effect = "Deny"
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      aws_s3_bucket.terraform_state.arn,
+      "${aws_s3_bucket.terraform_state.arn}/*"
+    ]
+    condition {
+      test = "Bool"
+      variable = "aws:SecureTransport"
+      values = [
+        false
+      ]
+    }
+    principals {
+      type = "*"
+      identifiers = ["*"]
+    }
+  }
+  statement {
+    sid = "RootAccess"
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      aws_s3_bucket.terraform_state.arn,
+      "${aws_s3_bucket.terraform_state.arn}/*"
+    ]
+    principals {
+      type = "AWS"
+      identifiers = [data.aws_caller_identity.current.account_id]
+    }
+  }
+}
+ 
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.backend_bucket
 }
+
 
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
@@ -76,4 +121,9 @@ resource "aws_s3_bucket_public_access_block" "block_public" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.terraform_state.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
 }

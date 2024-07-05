@@ -31,12 +31,5 @@ Because the bucket is in use, we first need to transfer the backend back to loca
 ```
 terraform init -migrate-state   
 terraform apply -var-file='test.tfvars'  
-```
-
-the state is local again, but there is another manual step
-
-- in the aws console, under buckets, select the bucket and click the "empty" button
-
-```
 terraform destroy -var-file='test.tfvars'  
 ```

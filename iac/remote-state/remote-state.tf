@@ -42,6 +42,60 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = var.backend_bucket
+  force_destroy = true
+}
+
+
+resource "aws_s3_bucket_logging" "terraform_bucket_logging" {
+  bucket        = aws_s3_bucket.terraform_state.id
+  target_bucket = aws_s3_bucket.s3_logging.id
+  target_prefix = "s3-logs-terraform-state-"
+}
+
+resource "aws_s3_bucket_versioning" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_dynamodb_table" "remote_state_lock" {
+  name           = "remote-state-lock"
+  read_capacity  = 1
+  write_capacity = 1
+  hash_key       = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+# this rule should be redundant as of jan 5 2023
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_bucket_encryption_rule" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# should be redundant as of apr 2023
+resource "aws_s3_bucket_public_access_block" "terraform_block_public" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 data "aws_iam_policy_document" "bucket_policy" {
   statement {
     sid    = "AllowSSLRequestsOnly"
@@ -67,35 +121,9 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 
-data "aws_iam_policy_document" "logging_bucket_policy" {
-  statement {
-    sid    = "S3ServerAccessLogsPolicy"
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["logging.s3.amazonaws.com"]
-    }
-    actions = [
-      "s3:PutObject"
-    ]
-    resources = [
-      "${aws_s3_bucket.s3_logging.arn}/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values = [
-        data.aws_caller_identity.current.account_id
-      ]
-    }
-    
-  }
-}
-
-
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.backend_bucket
-  force_destroy = true
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.terraform_state.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
 }
 
 
@@ -138,43 +166,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "s3_logging_lifecycle" {
   }
 }
 
-resource "aws_s3_bucket_logging" "terraform_bucket_logging" {
-  bucket        = aws_s3_bucket.terraform_state.id
-  target_bucket = aws_s3_bucket.s3_logging.id
-  target_prefix = "s3-logs-terraform-state-"
-}
-
-resource "aws_s3_bucket_versioning" "terraform_state" {
-  bucket = aws_s3_bucket.terraform_state.id
-
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_dynamodb_table" "remote_state_lock" {
-  name           = "remote-state-lock"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
-
-# this rule should be redundant as of jan 5 2023
-resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_bucket_encryption_rule" {
-  bucket = aws_s3_bucket.terraform_state.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
 # this rule should be redundant as of jan 5 2023
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging_bucket_encryption_rule" {
   bucket = aws_s3_bucket.s3_logging.id
@@ -184,17 +175,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging_bucket_en
       sse_algorithm = "AES256"
     }
   }
-}
-
-
-# should be redundant as of apr 2023
-resource "aws_s3_bucket_public_access_block" "terraform_block_public" {
-  bucket = aws_s3_bucket.terraform_state.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
 }
 
 # should be redundant as of apr 2023
@@ -207,9 +187,29 @@ resource "aws_s3_bucket_public_access_block" "logging_block_public" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_policy" "bucket_policy" {
-  bucket = aws_s3_bucket.terraform_state.id
-  policy = data.aws_iam_policy_document.bucket_policy.json
+data "aws_iam_policy_document" "logging_bucket_policy" {
+  statement {
+    sid    = "S3ServerAccessLogsPolicy"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.s3_logging.arn}/*"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
+    
+  }
 }
 
 resource "aws_s3_bucket_policy" "logging_bucket_policy" {

@@ -42,6 +42,7 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+//====================== TERRAFORM STATE BUCKET ==============
 
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.backend_bucket
@@ -60,18 +61,6 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
 
   versioning_configuration {
     status = "Enabled"
-  }
-}
-
-resource "aws_dynamodb_table" "remote_state_lock" {
-  name           = "remote-state-lock"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
   }
 }
 
@@ -126,6 +115,21 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   policy = data.aws_iam_policy_document.bucket_policy.json
 }
 
+//====================== DYNAMO DB ==============
+
+resource "aws_dynamodb_table" "remote_state_lock" {
+  name           = "remote-state-lock"
+  read_capacity  = 1
+  write_capacity = 1
+  hash_key       = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+//====================== LOGGING BUCKET ==============
 
 resource "aws_s3_bucket" "s3_logging" {
   bucket = var.s3_logging_bucket

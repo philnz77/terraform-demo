@@ -13,12 +13,12 @@ variable "s3_logging_bucket" {
 
 
 terraform {
-  # backend "s3" {
-  #   key            = "remote-state/terraform.tfstate"
-  #   encrypt        = true
-  #   region         = "ap-southeast-2"
-  #   dynamodb_table = "remote-state-lock"
-  # }
+  backend "s3" {
+    key            = "remote-state/terraform.tfstate"
+    encrypt        = true
+    region         = "ap-southeast-2"
+    dynamodb_table = "remote-state-lock"
+  }
 
   required_providers {
     aws = {

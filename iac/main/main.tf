@@ -6,6 +6,10 @@ variable "environment" {
   type = string
 }
 
+variable "subnet_ids" {
+  type = list(string)
+}
+
 terraform {
   backend "s3" {
     key            = "main/terraform.tfstate"
@@ -34,13 +38,6 @@ provider "aws" {
   }
 }
 
-data "aws_subnets" "for_vpc" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-}
-
 resource "aws_security_group" "cache_security_group" {
   name        = "cache-security-group"
   description = "Allow inbound traffic to elasticache"
@@ -48,7 +45,7 @@ resource "aws_security_group" "cache_security_group" {
 }
 
 resource "aws_elasticache_subnet_group" "cache_subnet_group" {
-  subnet_ids  = toset(data.aws_subnets.for_vpc.ids)
+  subnet_ids  = toset(var.subnet_ids)
   name        = "cache-subnet-group"
   description = "The only subnet for elasticache"
 }
@@ -70,6 +67,7 @@ resource "aws_elasticache_replication_group" "cache_replication_group" {
   at_rest_encryption_enabled = true
   snapshot_retention_limit   = 5
   snapshot_window            = "00:00-03:00"
+  multi_az_enabled           = true
   timeouts {
     create = "30m"
   }

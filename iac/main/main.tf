@@ -68,6 +68,8 @@ resource "aws_elasticache_replication_group" "cache_replication_group" {
   replicas_per_node_group    = 1
   transit_encryption_enabled = true
   at_rest_encryption_enabled = true
+  snapshot_retention_limit   = 5
+  snapshot_window            = "00:00-03:00"
   timeouts {
     create = "30m"
   }

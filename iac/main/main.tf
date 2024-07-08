@@ -45,7 +45,7 @@ resource "aws_security_group" "cache_security_group" {
 }
 
 resource "aws_elasticache_subnet_group" "cache_subnet_group" {
-  subnet_ids  = toset(var.subnet_ids)
+  subnet_ids  = var.subnet_ids
   name        = "cache-subnet-group"
   description = "The only subnet for elasticache"
 }

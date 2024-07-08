@@ -33,3 +33,7 @@ terraform init -migrate-state
 terraform apply -var-file='test.tfvars'  
 terraform destroy -var-file='test.tfvars'  
 ```
+
+## Packaging lambda
+cd demo-lambda
+zip -r ../iac/demo-lambda/myapp-lambda7.zip . -x "*DS_Store"

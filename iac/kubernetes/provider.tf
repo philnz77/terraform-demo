@@ -6,6 +6,14 @@ variable "environment" {
   type = string
 }
 
+locals {
+  region = "ap-southeast-2"
+  zoneA = "ap-southeast-2a"
+  zoneB = "ap-southeast-2b"
+  cluster_name = "my-cluster"
+  cluster_version = "1.30"
+}
+
 terraform {
   backend "s3" {
     key            = "kubernetes/terraform.tfstate"
@@ -31,13 +39,6 @@ provider "aws" {
       Environment = var.environment
       Module      = "kubernetes"
     }
-  }
-}
-
-data "aws_subnets" "for_vpc" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
   }
 }
 

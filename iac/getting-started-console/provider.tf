@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key            = "kubernetes/terraform.tfstate"
+    key            = "gettingstarted/terraform.tfstate"
     encrypt        = true
     region         = "ap-southeast-2"
     dynamodb_table = "remote-state-lock"
@@ -21,7 +21,7 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = var.environment
-      Module      = "kubernetes"
+      Module      = "gettingstarted"
     }
   }
 }

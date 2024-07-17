@@ -20,6 +20,22 @@ resource "aws_eks_addon" "coredns" {
   addon_version               = data.aws_eks_addon_version.coredns.version
   resolve_conflicts_on_update = "OVERWRITE"
   resolve_conflicts_on_create = "OVERWRITE"
+  depends_on = [
+    aws_eks_fargate_profile.system["kube-system"]
+  ]
+#  configuration_values = jsonencode({
+#    replicaCount = 2
+#    resources = {
+#      limits = {
+#        cpu    = "100m"
+#        memory = "150Mi"
+#      }
+#      requests = {
+#        cpu    = "100m"
+#        memory = "150Mi"
+#      }
+#    }
+#  })
 }
 
 resource "aws_eks_addon" "eks_pod_identity_agent" {

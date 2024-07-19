@@ -26,6 +26,8 @@ locals {
     aws_subnet.private-zone-a.id,
     aws_subnet.private-zone-b.id,
   ]
+
+  fargate_log_group_name = "fargate_logs"
 }
 
 

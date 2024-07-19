@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "eks_fargate_logging" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_fargate_logging_system" {
-  policy_arn = aws_iam_policy.eks_fargate_logging_system.arn
+  policy_arn = aws_iam_policy.eks_fargate_logging.arn
   role       = aws_iam_role.eks_fargate_system.name
 }
 

@@ -21,7 +21,7 @@ resource "aws_eks_addon" "coredns" {
   resolve_conflicts_on_update = "OVERWRITE"
   resolve_conflicts_on_create = "OVERWRITE"
   depends_on = [
-    aws_eks_fargate_profile.system["kube-system"]
+    aws_eks_fargate_profile.kube-system
   ]
 #  configuration_values = jsonencode({
 #    replicaCount = 2

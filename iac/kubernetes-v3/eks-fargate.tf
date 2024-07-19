@@ -54,7 +54,7 @@ resource "aws_eks_fargate_profile" "kube-system" {
     aws_iam_role_policy_attachment.eks_fargate_pod_execution_system
   ]
 }
-\
+
 
 
 

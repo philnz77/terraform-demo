@@ -23,5 +23,5 @@ resource "helm_release" "metrics-server" {
     value = false
   }
 
-  depends_on = [aws_eks_fargate_profile.system["kube-system"]]
+  depends_on = [aws_eks_fargate_profile.kube-system]
 }

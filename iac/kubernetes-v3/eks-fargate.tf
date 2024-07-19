@@ -12,13 +12,27 @@ resource "aws_eks_fargate_profile" "my-app" {
   ]
 }
 
-resource "aws_eks_fargate_profile" "default" {
+#resource "aws_eks_fargate_profile" "default" {
+#  cluster_name           = aws_eks_cluster.cluster.name
+#  fargate_profile_name   = "default"
+#  pod_execution_role_arn = aws_iam_role.eks_fargate.arn
+#  subnet_ids             = local.private_subnet_ids
+#  selector {
+#    namespace = "default"
+#  }
+#  depends_on = [
+#    aws_iam_role_policy_attachment.eks_fargate_logging,
+#    aws_iam_role_policy_attachment.eks_fargate_pod_execution
+#  ]
+#}
+
+resource "aws_eks_fargate_profile" "staging" {
   cluster_name           = aws_eks_cluster.cluster.name
-  fargate_profile_name   = "default"
+  fargate_profile_name   = "staging"
   pod_execution_role_arn = aws_iam_role.eks_fargate.arn
   subnet_ids             = local.private_subnet_ids
   selector {
-    namespace = "default"
+    namespace = "staging"
   }
   depends_on = [
     aws_iam_role_policy_attachment.eks_fargate_logging,
@@ -26,37 +40,21 @@ resource "aws_eks_fargate_profile" "default" {
   ]
 }
 
-resource "aws_eks_fargate_profile" "system" {
-  for_each               = toset(["kube-system", "flux-system", "istio-system"])
-  cluster_name           = aws_eks_cluster.cluster.name
-  fargate_profile_name   = each.value
-  pod_execution_role_arn = aws_iam_role.eks_fargate_system.arn
-  subnet_ids             = local.private_subnet_ids
-  selector {
-    namespace = each.value
-  }
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_fargate_logging_system,
-    aws_iam_role_policy_attachment.eks_fargate_pod_execution_system
-  ]
-}
 
-resource "aws_eks_fargate_profile" "operations" {
+resource "aws_eks_fargate_profile" "kube-system" {
   cluster_name           = aws_eks_cluster.cluster.name
-  fargate_profile_name   = "operations"
+  fargate_profile_name   = "kube-system"
   pod_execution_role_arn = aws_iam_role.eks_fargate_system.arn
   subnet_ids             = local.private_subnet_ids
   selector {
-    namespace = "operations"
-    labels = {
-      "fargate-enabled" = "true"
-    }
+    namespace = "kube-system"
   }
   depends_on = [
     aws_iam_role_policy_attachment.eks_fargate_logging_system,
     aws_iam_role_policy_attachment.eks_fargate_pod_execution_system
   ]
 }
+\
 
 
 

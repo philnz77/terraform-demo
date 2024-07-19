@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key            = "kubernetes-v3/terraform.tfstate"
+    key            = "eks-cluster/terraform.tfstate"
     encrypt        = true
     region         = "ap-southeast-2"
     dynamodb_table = "remote-state-lock"
@@ -10,6 +10,9 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.57"
+    }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
     }
   }
 
@@ -21,7 +24,7 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = var.environment
-      Module      = "kubernetes-v3"
+      Module      = "eks-cluster"
     }
   }
 }

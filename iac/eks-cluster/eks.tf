@@ -10,8 +10,8 @@ resource "aws_eks_cluster" "cluster" {
     #something to do with private route 53 hosted zones, openvpn on ubuntu?
     endpoint_private_access = true
     #if we still need to use a public endpoint we can restrict access with cidr blocks
-    endpoint_public_access = true
-    public_access_cidrs    = ["0.0.0.0/0"]
+#    endpoint_public_access = true
+#    public_access_cidrs    = ["0.0.0.0/0"]
 
     subnet_ids = local.private_subnet_ids
   }

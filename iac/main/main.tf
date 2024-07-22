@@ -68,7 +68,21 @@ resource "aws_elasticache_replication_group" "cache_replication_group" {
   snapshot_retention_limit   = 5
   snapshot_window            = "00:00-03:00"
   multi_az_enabled           = true
+  log_delivery_configuration {
+    destination = aws_cloudwatch_log_group.elasticache.name
+    destination_type = "cloudwatch-logs"
+    log_format = "json"
+    log_type = "slow-log"
+  }
+  log_delivery_configuration {
+    destination = aws_cloudwatch_log_group.elasticache.name
+    destination_type = "cloudwatch-logs"
+    log_format = "json"
+    log_type = "engine-log"
+  }
   timeouts {
     create = "30m"
+    update = "30m"
+    delete = "30m"
   }
 }

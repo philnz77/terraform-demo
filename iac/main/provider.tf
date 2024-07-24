@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key            = "eks-cluster/terraform.tfstate"
+    key            = "main/terraform.tfstate"
     encrypt        = true
     region         = "ap-southeast-2"
     dynamodb_table = "remote-state-lock"
@@ -21,9 +21,7 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = var.environment
-      Module      = "eks-cluster"
+      Module      = "main"
     }
   }
 }
-
-
